@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h4>
+  Leagues
+</h4>
+{% if leagues %}
+<table class="table table-striped table-bordered">
+  {% for league in leagues %}
+  <tr>
+    <td>
+      <a href="{% url league_home league.lid %}">
+      <div>
+	{{ league.name }}
+      </div>
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

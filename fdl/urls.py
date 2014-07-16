@@ -6,7 +6,10 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'fdl.views.home', name='home'),
+    url(r'^$', 'gm.views.home', name='home'),
+    url(r'^accounts/', include('custom_registration.urls')),
+    url(r'^accounts/', include('registration.backends.simple.urls')),
+    url(r'^draft/', include('draft.urls')),
     # url(r'^fdl/', include('fdl.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
