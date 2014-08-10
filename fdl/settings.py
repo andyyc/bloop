@@ -116,6 +116,16 @@ TEMPLATE_DIRS = (
     '/vagrant/fdl/templates',
 )
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -127,10 +137,12 @@ INSTALLED_APPS = (
     #'league',
     #'draft',
     #'gm',
-    #'registration',
+    'registration',
     #'custom_registration',
-    #'tastypie',
     'api',
+    'rest_auth',
+    'rest_framework',
+    'rest_framework.authtoken',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:

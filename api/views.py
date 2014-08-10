@@ -5,13 +5,13 @@ from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 import json, time
 import nfldb
-from models import Play
-
+from models import Play, Comment
+from rest_framework import permissions
 
 GAME_DAY_FULLNAME_ARRAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 def week_choices(request):
-    time.sleep(2)
+    time.sleep(1)
 
     response_data = {
         "week_choices" : [
@@ -116,7 +116,7 @@ def week_choices(request):
 '''
 
 def week(request, week_id):
-    time.sleep(2)
+    time.sleep(1)
     print week_id
     week_id_split = week_id.split('_')
     db = nfldb.connect()
@@ -131,7 +131,7 @@ def week(request, week_id):
         season_type = "Playoff"
 
     week = week_id_split[1]
-    season_year = 2013
+    season_year = 2014
 
     q.game(season_year=season_year,season_type=season_type,week=week)
     scoreboard = []
@@ -242,3 +242,26 @@ def game(request, gamekey):
     }
 
     return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
+from api.serializers import CommentSerializer
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework import status
+from models import Post, Game
+
+class CommentList(generics.ListCreateAPIView):
+    queryset = None
+    serializer_class = CommentSerializer
+    authentication_classes = (permissions.AllowAny,)
+
+    def get(self, request, format=None):
+        gamekey = request.QUERY_PARAMS.get('gamekey')
+        print gamekey
+        try:
+            game = Game.objects.get(gamekey=gamekey)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        comments = Comment.objects.filter(post=game.post)
+        serializer = CommentSerializer(comments)
+        return Response(serializer.data)
