@@ -31,6 +31,27 @@ class Post(models.Model):
     def __unicode__(self):
         return u'%s' % self.title
 
+import nfldb
+from django.db.models.signals import post_init
+
 class Game(models.Model):
     gamekey = models.CharField(max_length = 5, unique=True)
     post = models.ForeignKey('Post')
+
+    @property
+    def name(self):
+        return "%s at %s" % (self.nfldb_game.away_team, self.nfldb_game.home_team)
+
+    @property
+    def score(self):
+        return "%s-%s" % (self.nfldb_game.away_score, self.nfldb_game.home_score)
+
+
+def handle_game_post_init(**kwargs):
+    instance = kwargs.get('instance')
+    db = nfldb.connect()
+    q = nfldb.Query(db)
+    q.game(gamekey=instance.gamekey)
+    instance.nfldb_game = q.as_games()[0]
+
+post_init.connect(handle_game_post_init, Game)

@@ -151,10 +151,13 @@ def week(request, week_id):
                 "games": games,
             }
             scoreboard.append(scoreboard_section)
+
+        game_object = Game.objects.get(gamekey=game.gamekey)
         game_json = {
             "gamekey": game.gamekey,
             "name": "%s at %s" % (game.away_team, game.home_team),
             "score": "%s-%s" % (game.away_score, game.home_score),
+            "post": game_object.post_id
         }
         dateToGames[date].append(game_json)
 
@@ -197,7 +200,6 @@ def week(request, week_id):
 '''
 
 def game(request, gamekey):
-    time.sleep(2)
     print gamekey
     db = nfldb.connect()
     q = nfldb.Query(db)
@@ -244,20 +246,25 @@ def game(request, gamekey):
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 
-from api.serializers import CommentSerializer
-from rest_framework import generics
+from api.serializers import CommentSerializer, GameSerializer
+from rest_framework import generics, mixins
 from rest_framework.response import Response
 from rest_framework import status
 from models import Post, Game
 
-class CommentList(generics.ListCreateAPIView):
+
+class CommentList(mixins.CreateModelMixin,
+    generics.GenericAPIView):
     queryset = None
     serializer_class = CommentSerializer
     authentication_classes = (permissions.AllowAny,)
 
+    def pre_save(self, obj):
+        obj.author = self.request.user
+        obj.author_name = self.request.user.username
+
     def get(self, request, format=None):
         gamekey = request.QUERY_PARAMS.get('gamekey')
-        print gamekey
         try:
             game = Game.objects.get(gamekey=gamekey)
         except:
@@ -265,3 +272,62 @@ class CommentList(generics.ListCreateAPIView):
         comments = Comment.objects.filter(post=game.post)
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+class GameDetail(generics.RetrieveAPIView):
+    authentication_classes = (permissions.AllowAny,)
+
+    def get_object(self, gamekey):
+        try:
+            return Game.objects.get(gamekey=gamekey)
+        except Game.DoesNotExist:
+            raise Http404
+
+    def get(self, request, gamekey, format=None):
+        game = self.get_object(gamekey)
+        serializer = GameSerializer(game)
+        return Response(serializer.data)
+
+    def get_nfldb_game(self, gamekey):
+        db = nfldb.connect()
+        q = nfldb.Query(db)
+        q.game(gamekey=gamekey)
+        nfldb_game = q.as_games()[0]
+
+        summary = []
+        quarterNumToQuarterStringMap = {
+            "1": "1st Quarter",
+            "2": "2nd Quarter",
+            "3": "3rd Quarter",
+            "4": "4th Quarter",
+        }
+        quarterToPlays = {}
+        for play in Play.objects.filter(gamekey=gamekey).order_by('quarter', '-time'):
+            if play.quarter not in quarterToPlays:
+                quarterToPlays[play.quarter] = []
+                summary.append(
+                    {
+                        "quarter": quarterNumToQuarterStringMap[play.quarter],
+                        "plays": quarterToPlays[play.quarter]
+                    }
+                )
+            play_json = {
+                "time": play.time,
+                "down": play.down,
+                "text": play.text,
+                "video": play.video_url
+            }
+            quarterToPlays[play.quarter].append(play_json)
+
+        print summary
+
+        response_data = {
+            "summary": summary,
+            "name": "%s at %s" % (nfldb_game.away_team, nfldb_game.home_team),
+            "score": "%s-%s" % (nfldb_game.away_score, nfldb_game.home_score),
+        }
+
+
+        return response_data
