@@ -2,7 +2,6 @@ from django.conf.urls import patterns, url
 from rest_auth.views import Login, Logout, Register, UserDetails, \
     PasswordChange, PasswordReset, VerifyEmail, PasswordResetConfirm
 
-
 urlpatterns = patterns('rest_auth.views',
                        # URLs that do not require a session or valid token
                        url(r'^register/$', Register.as_view(),

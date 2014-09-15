@@ -1,14 +1,65 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.templatetags.static import static
+
+team_icon_dict = {
+        "ARI":static("team_icons/ARI.png"),
+        "ATL":static("team_icons/ATL.png"),
+        "BAL":static("team_icons/BAL.png"),
+        "BUF":static("team_icons/BUF.png"),
+        "CAR":static("team_icons/CAR.png"),
+        "CHI":static("team_icons/CHI.png"),
+        "CIN":static("team_icons/CIN.png"),
+        "CLE":static("team_icons/CLE.png"),
+        "DAL":static("team_icons/DAL.png"),
+        "DEN":static("team_icons/DEN.png"),
+        "DET":static("team_icons/DET.png"),
+        "GB":static("team_icons/GB.png"),
+        "HOU":static("team_icons/HOU.png"),
+        "IND":static("team_icons/IND.png"),
+        "JAC":static("team_icons/JAC.png"),
+        "KC":static("team_icons/KC.png"),
+        "MIA":static("team_icons/MIA.png"),
+        "MIN":static("team_icons/MIN.png"),
+        "NE":static("team_icons/NE.png"),
+        "NO":static("team_icons/NO.png"),
+        "NYG":static("team_icons/NYG.png"),
+        "NYJ":static("team_icons/NYJ.png"),
+        "OAK":static("team_icons/OAK.png"),
+        "PHI":static("team_icons/PHI.png"),
+        "PIT":static("team_icons/PIT.png"),
+        "SD":static("team_icons/SD.png"),
+        "SEA":static("team_icons/SEA.png"),
+        "SF":static("team_icons/SF.png"),
+        "STL":static("team_icons/STL.png"),
+        "TB":static("team_icons/TB.png"),
+        "TEN":static("team_icons/TEN.png"),
+        "WAS":static("team_icons/WAS.png"),
+    }
 
 class Play(models.Model):
+    QUARTER_CHOICES = (
+        (1, 'First'),
+        (2, 'Second'),
+        (3, 'Third'),
+        (4, 'Fourth'),
+        (5, 'Overtime'),
+    )
+
     gamekey = models.CharField(max_length = 5, db_index=True)
     down = models.CharField(max_length = 10)
     text = models.CharField(max_length = 160)
     video_url = models.URLField(blank=True)
-    quarter = models.CharField(max_length = 1)
+    quarter = models.CharField(max_length = 1, choices=QUARTER_CHOICES)
     time = models.CharField(max_length = 5)
     points = models.PositiveIntegerField(default=0)
+    team = models.CharField(max_length = 3, blank=True)
+    score = models.CharField(max_length = 7)
+
+    @property
+    def team_icon(self):
+        return team_icon_dict[self.team]
+
 
 class CommentBump(models.Model):
     comment = models.ForeignKey('Comment')
@@ -52,6 +103,22 @@ class Game(models.Model):
     post = models.ForeignKey('Post')
 
     @property
+    def away_team(self):
+        return self.nfldb_game.away_team
+
+    @property
+    def home_team(self):
+        return self.nfldb_game.home_team
+
+    @property
+    def away_team_icon(self):
+        return team_icon_dict[self.nfldb_game.away_team]
+
+    @property
+    def home_team_icon(self):
+        return team_icon_dict[self.nfldb_game.home_team]
+
+    @property
     def name(self):
         return "%s at %s" % (self.nfldb_game.away_team, self.nfldb_game.home_team)
 
@@ -79,11 +146,13 @@ class Game(models.Model):
     def week(self):
         return self.nfldb_game.week
 
+
 def handle_game_post_init(**kwargs):
     instance = kwargs.get('instance')
     db = nfldb.connect()
     q = nfldb.Query(db)
     q.game(gamekey=instance.gamekey)
     instance.nfldb_game = q.as_games()[0]
+    db.close()
 
 post_init.connect(handle_game_post_init, Game)

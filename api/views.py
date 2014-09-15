@@ -9,7 +9,11 @@ from models import Play, Comment
 from rest_framework import permissions
 
 def week_choices(request):
-    response_data = {
+    response_data = week_choices_dict()
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def week_choices_dict():
+    return {
         "week_choices" : [
             "Preseason 0",
             "Preseason 1",
@@ -60,7 +64,6 @@ def week_choices(request):
         ]
     }
 
-    return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 from api.serializers import CommentSerializer, GameSerializer, PlaySerializer, CommentBumpSerializer
 from rest_framework import generics, mixins
@@ -159,11 +162,12 @@ class Week(generics.RetrieveAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get(self, request, week_id, format=None):
-        games = self._games_for_weekid(week_id)
+        games = self.games_for_weekid(week_id)
         serializer = GameSerializer(games, many = True)
         return Response(serializer.data)
 
-    def _games_for_weekid(self, week_id):
+    @classmethod
+    def games_for_weekid(self, week_id):
         db = nfldb.connect()
         q = nfldb.Query(db)
         week_id_split = week_id.split('_')
@@ -188,9 +192,10 @@ class Week(generics.RetrieveAPIView):
 
         return games
 
-class PlayList(APIView):
+class PlayList(generics.ListCreateAPIView):
     queryset = None
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    serializer_class = PlaySerializer
 
     def get(self, request, format=None):
         gamekey = request.QUERY_PARAMS.get('gamekey')

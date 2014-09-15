@@ -1,0 +1,16 @@
+
+
+.week-choices-carousel h4
+{
+    text-align:center;
+}
+
+.week-choices-carousel .slick-prev:before, .week-choices-carousel .slick-next:before
+{
+    color:#666666;
+}
+
+.scoreboard tr.hover
+{
+    cursor:pointer;
+}

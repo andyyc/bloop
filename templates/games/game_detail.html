@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block header_css %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/scoreboard.css"/>
+{% endblock %}
+
+{% block header_js %}
+{% endblock %}
+
+{% block content %}
+
+<div class="play-form">
+  <form>
+    {{ play_form.as_table }}
+    <div>
+      <input type="submit" value="submit">
+    </div>
+  </form>
+</div>
+
+<table cellpadding=8>
+  <thead>
+    <tr>
+      <th>
+        Time
+      </th>
+      <th>
+        Down
+      </th>
+      <th>
+        Team
+      </th>
+      <th>
+        Text
+      </th>
+      <th>
+        Video
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for play in plays %}
+    <tr>
+      <td>
+        {{ play.quarter }} / {{ play.time }}
+      </td>
+      <td>
+        {{ play.down }}
+      </td>
+      <td>
+        {{ play.team }}
+      </td>
+      <td>
+        {{ play.text }}
+      </td>
+      <td>
+        {{ play.video_url }}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
+
+{% block footer_js %}
+
+<script type="text/javascript">
+
+</script>
+
+{% endblock %}

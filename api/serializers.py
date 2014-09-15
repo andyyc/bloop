@@ -15,6 +15,11 @@ class GameSerializer(serializers.ModelSerializer):
     date = serializers.CharField(max_length=6)
     day_of_week = serializers.CharField(max_length=10)
     week = serializers.IntegerField()
+    away_team = serializers.CharField(max_length=3)
+    home_team = serializers.CharField(max_length=3)
+    away_team_icon = serializers.CharField()
+    home_team_icon = serializers.CharField()
+
 
     class Meta:
         model = Game
