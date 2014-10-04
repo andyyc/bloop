@@ -1,4 +1,19 @@
+.week-choices-list
+{
+    list-style-type: none;
+    margin: 0;
+}
 
+.week-choices-list li
+{
+    display:inline-block;
+}
+
+.scoreboard
+{
+    list-style-type: none;
+    margin:10px 0px 0px 0px;
+}
 
 .week-choices-carousel h4
 {
@@ -13,4 +28,30 @@
 .scoreboard tr.hover
 {
     cursor:pointer;
+}
+
+.play-form-table input
+{
+    width:50px;
+}
+
+.play-form-table select
+{
+    width:60px;
+}
+
+.play-form-table textarea
+{
+    height:60px;
+}
+
+#id_gfy_url, #id_mp4_url
+{
+    width:200px;
+}
+
+.play-table form
+{
+    margin:0px;
+    display:inline-block;
 }

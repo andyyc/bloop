@@ -69,7 +69,7 @@
             <span class="icon-bar"></span>
           </button>
           -->
-          <a class="brand" href="#">Sports Chub</a>
+          <a class="brand" href="{% url 'scoreboard' %}">Sports Chub</a>
           <div>
             {% if user.is_authenticated %}
                 <ul class="nav pull-right">
@@ -79,7 +79,7 @@
                       <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu" role="menu" aria-labelledby="user-nav">
-                      <li role="presentation"><a role="menuitem" href="{% url 'rest_framework:logout' %}">Logout</a></li>
+                      <li role="presentation"><a role="menuitem" href="{% url 'rest_auth:rest_logout' %}">Logout</a></li>
                     </ul>
                   </li>
                 </ul>

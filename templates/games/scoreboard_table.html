@@ -1,11 +1,9 @@
-<table class="scoreboard">
-  <tbody>
+<ul class="scoreboard">
     {% for game in games %}
-    <tr data-game-url='{% url "api:game" game.gamekey %}'>
-      <td>
+    <li>
+      <a href='{% url "game-detail" game.gamekey %}'>
         {{ game.name }}
-      </td>
-    </tr>
+      </a>
+    </li>
   {% endfor %}
-  </tbody>
-</table>
+</ul>

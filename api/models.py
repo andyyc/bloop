@@ -39,26 +39,33 @@ team_icon_dict = {
 
 class Play(models.Model):
     QUARTER_CHOICES = (
-        (1, 'First'),
-        (2, 'Second'),
-        (3, 'Third'),
-        (4, 'Fourth'),
-        (5, 'Overtime'),
+        ('1', '1st'),
+        ('2', '2nd'),
+        ('3', '3rd'),
+        ('4', '4th'),
+        ('5', 'OT'),
     )
 
     gamekey = models.CharField(max_length = 5, db_index=True)
-    down = models.CharField(max_length = 10)
+    down = models.CharField(blank=True, max_length = 10)
     text = models.CharField(max_length = 160)
-    video_url = models.URLField(blank=True)
+    gfy_url = models.CharField(blank=True, max_length = 128)
+    mp4_url = models.CharField(blank=True, max_length = 128)
     quarter = models.CharField(max_length = 1, choices=QUARTER_CHOICES)
     time = models.CharField(max_length = 5)
     points = models.PositiveIntegerField(default=0)
     team = models.CharField(max_length = 3, blank=True)
     score = models.CharField(max_length = 7)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    post = models.ForeignKey('Post', null=True)
 
     @property
     def team_icon(self):
-        return team_icon_dict[self.team]
+        if self.team:
+            return team_icon_dict[self.team]
+        else:
+            return ""
 
 
 class CommentBump(models.Model):

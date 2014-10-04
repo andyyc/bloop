@@ -51,7 +51,7 @@ def get_registration_backend():
 
 
 class LoggedInRESTAPIView(APIView):
-    authentication_classes = ((TokenAuthentication,))
+    authentication_classes = ((TokenAuthentication,SessionAuthentication))
     permission_classes = ((IsAuthenticated,))
 
 
@@ -117,6 +117,7 @@ class Logout(LoggedInRESTAPIView):
     """
 
     def get(self, request):
+        print 'logging out'
         try:
             request.user.auth_token.delete()
         except:

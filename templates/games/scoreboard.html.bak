@@ -12,13 +12,13 @@
 
 {% block content %}
 
-<ul class="week-choices-list">
-  {% for week_choice_tuple in week_choices_tuples %}
-  <li data-week-choice-id={{ week_choice_tuple.1 }}>
-    <a href="{% url 'scoreboard' week_choice_tuple.1 %}">{{ week_choice_tuple.0 }}</a>
-  </li>
-  {% endfor %}
-</ul>
+<div class="week-choices-carousel">
+{% for week_choice_tuple in week_choices_tuples %}
+  <div data-week-choice-id={{ week_choice_tuple.1 }} data-week-url={% url 'scoreboard_table' week_choice_tuple.1 %}>
+    <h4>{{ week_choice_tuple.0 }}</h4>
+  </div>
+{% endfor %}
+</div>
 
 <div class="scoreboard-table-container">
   {% include 'games/scoreboard_table.html' %}
@@ -29,6 +29,21 @@
 {% block footer_js %}
 
 <script type="text/javascript">
+  $(document).ready(function(){
+      $('.week-choices-carousel').slick({
+        'onAfterChange': function(slider, index){
+          var weekId = $(slider.$slides[index]).data('weekChoiceId');
+          var weekUrl = $(slider.$slides[index]).data('weekUrl');
+          $('.week-choices-carousel').currentSlide;
+          $.get(weekUrl)
+            .done(function(data) {
+              console.log(data);
+              $('.scoreboard').replaceWith(data);
+            });
+        }
+      });
+  });
+
   $('.scoreboard-table-container').on('click', 'tr', function() {
       window.location = $(this).data('gameUrl');
   }).on('mouseenter', 'tr', function() {

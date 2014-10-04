@@ -7,18 +7,89 @@
 {% block header_js %}
 {% endblock %}
 
+{% block title %}
+{{ game.name }}
+{% endblock %}
+
 {% block content %}
 
-<div class="play-form">
-  <form>
-    {{ play_form.as_table }}
-    <div>
-      <input type="submit" value="submit">
-    </div>
-  </form>
-</div>
+<h4>
+{{ game.name }}
+</h4>
 
-<table cellpadding=8>
+<form method='POST' actions=''>
+  {% csrf_token %}
+  <table class="play-form-table" cellpadding=8>
+    <thead>
+      <tr>
+        <th>
+          Qtr / Time
+        </th>
+        <th>
+          Down
+        </th>
+        <th>
+          Score
+        </th>
+        <th>
+          Team
+        </th>
+        <th>
+          Text
+        </th>
+        <th>
+          Gfy Video
+        </th>
+        <th>
+          mp4 Video
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          {{ play_form.quarter.errors }}
+          {{ play_form.quarter }}
+
+          {{ play_form.time.errors }}
+          {{ play_form.time }}
+        </td>
+        <td>
+          {{ play_form.down.errors }}
+          {{ play_form.down}}
+        </td>
+        <td>
+          {{ play_form.score.errors }}
+          {{ play_form.score }}
+        </td>
+        <td>
+          {{ play_form.team.errors }}
+          {{ play_form.team }}
+        </td>
+        <td>
+          {{ play_form.text.errors }}
+          {{ play_form.text }}
+        </td>
+        <td>
+          {{ play_form.gfy_url.errors }}
+          {{ play_form.gfy_url }}
+        </td>
+        <td>
+          {{ play_form.mp4_url.errors }}
+          {{ play_form.mp4_url }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  {% if edit %}
+    <input type="hidden" name="play_id" value="{{ play.id }}">
+    <input type="submit" name="edit" value="edit">
+  {% else %}
+    <input type="submit" value="submit">
+  {% endif %}
+</form>
+
+<table cellpadding=8 class="play-table">
   <thead>
     <tr>
       <th>
@@ -28,13 +99,22 @@
         Down
       </th>
       <th>
+        Score
+      </th>
+      <th>
         Team
       </th>
       <th>
         Text
       </th>
       <th>
-        Video
+        gfy Video
+      </th>
+      <th>
+        mp4 Video
+      </th>
+      <th>
+        Actions
       </th>
     </tr>
   </thead>
@@ -48,13 +128,34 @@
         {{ play.down }}
       </td>
       <td>
+        {{ play.score }}
+      </td>
+      <td>
         {{ play.team }}
       </td>
       <td>
         {{ play.text }}
       </td>
       <td>
-        {{ play.video_url }}
+        <a href="{{ play.gfy_url }}">
+          {{ play.gfy_url }}
+        </a>
+      </td>
+      <td>
+        <a href="{{ play.mp4_url }}">
+          {{ play.mp4_url }}
+        </a>
+      </td>
+      <td>
+        <form action="" method="GET">
+          <input type="hidden" name="play_id" value="{{ play.id }}">
+          <input type="submit" value="edit" name="edit">
+        </form>
+        <form action="" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="play_id" value="{{ play.id }}">
+          <input type="submit" value="delete" name="delete">
+        </form>
       </td>
     </tr>
   {% endfor %}
@@ -66,7 +167,6 @@
 {% block footer_js %}
 
 <script type="text/javascript">
-
 </script>
 
 {% endblock %}

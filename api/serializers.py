@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, pagination
 from api.models import Comment, Game, Play, CommentBump
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -20,15 +20,20 @@ class GameSerializer(serializers.ModelSerializer):
     away_team_icon = serializers.CharField()
     home_team_icon = serializers.CharField()
 
-
     class Meta:
         model = Game
 
 class PlaySerializer(serializers.ModelSerializer):
     time = serializers.CharField(max_length=5, min_length=5)
+    team_icon = serializers.CharField()
 
     class Meta:
         model = Play
+
+class PaginatedUserSerializer(pagination.PaginationSerializer):
+
+    class Meta:
+        object_serializer_class = PlaySerializer
 
 class CommentBumpSerializer(serializers.ModelSerializer):
     user = serializers.RelatedField(read_only=True)

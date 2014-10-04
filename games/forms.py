@@ -7,7 +7,7 @@ class PlayForm(ModelForm):
 
     class Meta:
         model = Play
-        exclude = ['gamekey', 'points']
+        exclude = ['gamekey', 'points', 'post']
 
     def __init__(self, away_team, home_team, *args, **kwargs):
         super(PlayForm, self).__init__(*args, **kwargs)

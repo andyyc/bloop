@@ -69,8 +69,7 @@ from api.serializers import CommentSerializer, GameSerializer, PlaySerializer, C
 from rest_framework import generics, mixins
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.views import APIView
-from models import Game, CommentBump
+from models import Game, CommentBump, Post
 
 class CommentList(mixins.CreateModelMixin, generics.GenericAPIView):
     queryset = None
@@ -82,12 +81,12 @@ class CommentList(mixins.CreateModelMixin, generics.GenericAPIView):
         obj.author_name = self.request.user.username
 
     def get(self, request, format=None):
-        gamekey = request.QUERY_PARAMS.get('gamekey')
+        post_id = request.QUERY_PARAMS.get('post_id')
         try:
-            game = Game.objects.get(gamekey=gamekey)
+            post = Post.objects.get(id=post_id)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        comments = Comment.objects.filter(post=game.post)
+        comments = Comment.objects.filter(post__id=post.id)
         serializer = CommentSerializer(comments, many=True)
 
         if self.request.user.is_authenticated():
@@ -117,46 +116,46 @@ class GameDetail(generics.RetrieveAPIView):
         serializer = GameSerializer(game)
         return Response(serializer.data)
 
-    def get_nfldb_game(self, gamekey):
-        db = nfldb.connect()
-        q = nfldb.Query(db)
-        q.game(gamekey=gamekey)
-        nfldb_game = q.as_games()[0]
-
-        summary = []
-        quarterNumToQuarterStringMap = {
-            "1": "1st Quarter",
-            "2": "2nd Quarter",
-            "3": "3rd Quarter",
-            "4": "4th Quarter",
-        }
-        quarterToPlays = {}
-        for play in Play.objects.filter(gamekey=gamekey).order_by('quarter', '-time'):
-            if play.quarter not in quarterToPlays:
-                quarterToPlays[play.quarter] = []
-                summary.append(
-                    {
-                        "quarter": quarterNumToQuarterStringMap[play.quarter],
-                        "plays": quarterToPlays[play.quarter]
-                    }
-                )
-            play_json = {
-                "time": play.time,
-                "down": play.down,
-                "text": play.text,
-                "video": play.video_url
-            }
-            quarterToPlays[play.quarter].append(play_json)
-
-        print summary
-
-        response_data = {
-            "summary": summary,
-            "name": "%s at %s" % (nfldb_game.away_team, nfldb_game.home_team),
-            "score": "%s-%s" % (nfldb_game.away_score, nfldb_game.home_score),
-        }
-
-        return response_data
+    # def get_nfldb_game(self, gamekey):
+    #     db = nfldb.connect()
+    #     q = nfldb.Query(db)
+    #     q.game(gamekey=gamekey)
+    #     nfldb_game = q.as_games()[0]
+    #
+    #     summary = []
+    #     quarterNumToQuarterStringMap = {
+    #         "1": "1st Quarter",
+    #         "2": "2nd Quarter",
+    #         "3": "3rd Quarter",
+    #         "4": "4th Quarter",
+    #     }
+    #     quarterToPlays = {}
+    #     for play in Play.objects.filter(gamekey=gamekey).order_by('quarter', '-time'):
+    #         if play.quarter not in quarterToPlays:
+    #             quarterToPlays[play.quarter] = []
+    #             summary.append(
+    #                 {
+    #                     "quarter": quarterNumToQuarterStringMap[play.quarter],
+    #                     "plays": quarterToPlays[play.quarter]
+    #                 }
+    #             )
+    #         play_json = {
+    #             "time": play.time,
+    #             "down": play.down,
+    #             "text": play.text,
+    #             "video": play.gfy_url,
+    #         }
+    #         quarterToPlays[play.quarter].append(play_json)
+    #
+    #     print summary
+    #
+    #     response_data = {
+    #         "summary": summary,
+    #         "name": "%s at %s" % (nfldb_game.away_team, nfldb_game.home_team),
+    #         "score": "%s-%s" % (nfldb_game.away_score, nfldb_game.home_score),
+    #     }
+    #
+    #     return response_data
 
 class Week(generics.RetrieveAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
@@ -192,7 +191,7 @@ class Week(generics.RetrieveAPIView):
 
         return games
 
-class PlayList(generics.ListCreateAPIView):
+class PlayList(generics.ListAPIView):
     queryset = None
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     serializer_class = PlaySerializer
@@ -203,9 +202,21 @@ class PlayList(generics.ListCreateAPIView):
             Game.objects.get(gamekey=gamekey)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        plays = Play.objects.filter(gamekey=gamekey).order_by('-time')
+        plays = Play.objects.filter(gamekey=gamekey).order_by('-quarter', 'time')
         serializer = PlaySerializer(plays, many=True)
         return Response(serializer.data)
+
+class PaginatedPlayList(generics.ListAPIView):
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    serializer_class = PlaySerializer
+
+    def get_queryset(self):
+        queryset = Play.objects.all().order_by('-created_at')
+        last_created_at = self.request.QUERY_PARAMS.get('last_created_at', None)
+        if last_created_at is not None:
+            queryset = queryset.filter(created_at__lt=last_created_at).order_by('-created_at')
+        return queryset[:9]
+
 
 class CommentBumpDetails(generics.GenericAPIView):
     permission_classes = (permissions.IsAuthenticated, )
