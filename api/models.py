@@ -49,7 +49,7 @@ class Play(models.Model):
     gamekey = models.CharField(max_length = 5, db_index=True)
     down = models.CharField(blank=True, max_length = 10)
     text = models.CharField(max_length = 160)
-    gfy_url = models.CharField(blank=True, max_length = 128)
+    gfy_id = models.CharField(blank=True, max_length = 128)
     mp4_url = models.CharField(blank=True, max_length = 128)
     quarter = models.CharField(max_length = 1, choices=QUARTER_CHOICES)
     time = models.CharField(max_length = 5)
@@ -64,6 +64,13 @@ class Play(models.Model):
     def team_icon(self):
         if self.team:
             return team_icon_dict[self.team]
+        else:
+            return ""
+
+    @property
+    def gfy_url(self):
+        if self.gfy_id:
+            return "http://gfycat.com/" + self.gfy_id
         else:
             return ""
 

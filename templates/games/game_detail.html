@@ -40,9 +40,6 @@
         <th>
           Gfy Video
         </th>
-        <th>
-          mp4 Video
-        </th>
       </tr>
     </thead>
     <tbody>
@@ -71,12 +68,8 @@
           {{ play_form.text }}
         </td>
         <td>
-          {{ play_form.gfy_url.errors }}
-          {{ play_form.gfy_url }}
-        </td>
-        <td>
-          {{ play_form.mp4_url.errors }}
-          {{ play_form.mp4_url }}
+          {{ play_form.gfy_id.errors }}
+          {{ play_form.gfy_id }}
         </td>
       </tr>
     </tbody>
@@ -111,9 +104,6 @@
         gfy Video
       </th>
       <th>
-        mp4 Video
-      </th>
-      <th>
         Actions
       </th>
     </tr>
@@ -138,12 +128,7 @@
       </td>
       <td>
         <a href="{{ play.gfy_url }}">
-          {{ play.gfy_url }}
-        </a>
-      </td>
-      <td>
-        <a href="{{ play.mp4_url }}">
-          {{ play.mp4_url }}
+          {{ play.gfy_id }}
         </a>
       </td>
       <td>

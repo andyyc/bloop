@@ -6,6 +6,8 @@ from games.forms import PlayForm
 from api.models import Game, Play, Post
 from api.views import Week
 
+from libs.gfycat import gfycat
+
 def scoreboard(request, week_id='R_1'):
     wc_dict = week_choices_dict()
     context = {}
@@ -59,6 +61,11 @@ def game_detail(request, gamekey):
                 # ...
                 # redirect to a new URL:
                 play = play_form.save(commit=False)
+
+                if play_form.cleaned_data['gfy_url']:
+                    mp4_url = gfycat().more(play_form.cleaned_data['gfy_url']).get('mp4Url')
+                    play.mp4_url = mp4_url
+
                 play.gamekey = gamekey
                 play.post = Post.objects.create(text=play.text)
                 play.save()
