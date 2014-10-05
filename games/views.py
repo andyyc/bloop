@@ -62,8 +62,8 @@ def game_detail(request, gamekey):
                 # redirect to a new URL:
                 play = play_form.save(commit=False)
 
-                if play_form.cleaned_data['gfy_url']:
-                    mp4_url = gfycat().more(play_form.cleaned_data['gfy_url']).get('mp4Url')
+                if play_form.cleaned_data['gfy_id']:
+                    mp4_url = gfycat().more(play_form.cleaned_data['gfy_id']).get('mp4Url')
                     play.mp4_url = mp4_url
 
                 play.gamekey = gamekey
