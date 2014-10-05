@@ -4,12 +4,16 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 import json, time
-import nfldb
+import nfldb, nflgame
 from models import Play, Comment
 from rest_framework import permissions
 
 def week_choices(request):
     response_data = week_choices_dict()
+    db = nfldb.connect()
+    current_week = nfldb.current(db)
+    response_data['current_year'] = current_week[1]
+    response_data['current_week'] = current_week[2]
     return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 def week_choices_dict():
