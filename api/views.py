@@ -1,10 +1,7 @@
 # Create your views here.
 from django.http import HttpResponse, Http404
-from django.template import RequestContext
-from django.shortcuts import render_to_response
-from django.contrib.auth.decorators import login_required
-import json, time
-import nfldb, nflgame
+import json
+import nfldb
 from models import Play, Comment
 from rest_framework import permissions
 
@@ -19,11 +16,6 @@ def week_choices(request):
 def week_choices_dict():
     return {
         "week_choices" : [
-            "Preseason 0",
-            "Preseason 1",
-            "Preseason 2",
-            "Preseason 3",
-            "Preseason 4",
             "Week 1",
             "Week 2",
             "Week 3",
@@ -43,11 +35,6 @@ def week_choices_dict():
             "Week 17"
         ],
         "week_choice_ids" : [
-            "PR_0",
-            "PR_1",
-            "PR_2",
-            "PR_3",
-            "PR_4",
             "R_1",
             "R_2",
             "R_3",
@@ -217,9 +204,12 @@ class PaginatedPlayList(generics.ListAPIView):
     def get_queryset(self):
         queryset = Play.objects.all().order_by('-created_at')
         last_created_at = self.request.QUERY_PARAMS.get('last_created_at', None)
+        most_recent_created_at = self.request.QUERY_PARAMS.get('most_recent_created_at', None)
         if last_created_at is not None:
-            queryset = queryset.filter(created_at__lt=last_created_at).order_by('-created_at')
-        return queryset[:9]
+            queryset = queryset.filter(created_at__lt=last_created_at)
+        elif most_recent_created_at is not None:
+            queryset = queryset.filter(created_at__gt=most_recent_created_at)
+        return queryset[:2]
 
 
 class CommentBumpDetails(generics.GenericAPIView):
