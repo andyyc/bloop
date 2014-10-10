@@ -209,7 +209,7 @@ class PaginatedPlayList(generics.ListAPIView):
             queryset = queryset.filter(created_at__lt=last_created_at)
         elif most_recent_created_at is not None:
             queryset = queryset.filter(created_at__gt=most_recent_created_at)
-        return queryset[:2]
+        return queryset[:9]
 
 
 class CommentBumpDetails(generics.GenericAPIView):
